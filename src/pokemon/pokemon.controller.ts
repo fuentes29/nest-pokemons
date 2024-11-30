@@ -1,41 +1,37 @@
-import { Controller, Post, Body, Get, Param, Patch, HttpCode, ValidationPipe, UsePipes, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { PokemonService } from './pokemon.service';
 import { CreatePokemonDto } from './dto/create-pokemon.dto';
 import { UpdatePokemonDto } from './dto/update-pokemon.dto';
 
+import { ParseMongoIdPipe } from 'src/common/pipes/parse-mongo-id.pipe';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
-@Controller('pokemon')  
+@Controller('pokemon')
 export class PokemonController {
   constructor(private readonly pokemonService: PokemonService) {}
 
-  @HttpCode(200)
-  @Get(':term')
-   findOne(@Param('term') term: string){
-    return this.pokemonService.findOne(term);
-
-  }
-  @HttpCode(200)
-  @UsePipes(new ValidationPipe)
-  @Post() 
-  async create(@Body() createPokemonDto: CreatePokemonDto) {
+  @Post()
+  create(@Body() createPokemonDto: CreatePokemonDto) {
     return this.pokemonService.create(createPokemonDto);
   }
 
+  @Get()
+  findAll( @Query() paginationDto: PaginationDto ) {
+    return this.pokemonService.findAll( paginationDto );
+  }
 
+  @Get(':term')
+  findOne(@Param('term') term: string) {
+    return this.pokemonService.findOne( term );
+  }
 
-  @HttpCode(200)
-  @UsePipes(new ValidationPipe)
   @Patch(':term')
-  updatePokemon(@Param('term') term: string, @Body() updatePokemonDto: UpdatePokemonDto) {
-    return this.pokemonService.update(term, updatePokemonDto);
-  
+  update(@Param('term') term: string, @Body() updatePokemonDto: UpdatePokemonDto) {
+    return this.pokemonService.update( term, updatePokemonDto);
   }
 
-  @HttpCode(200)
-  @Delete(':term')
-  deletePokemon(@Param('term') term: string){
-    return this.pokemonService.deletePokemon(term);
-    
+  @Delete(':id')
+  remove(@Param('id', ParseMongoIdPipe ) id: string) {
+    return this.pokemonService.remove( id );
   }
-
 }

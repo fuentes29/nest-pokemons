@@ -1,24 +1,43 @@
+import { join } from 'path'; // en Node
 import { Module } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { MongooseModule } from '@nestjs/mongoose';
-import { join } from 'path';
-import { HttpModule } from '@nestjs/axios';
+import { ConfigModule } from '@nestjs/config';
 
-import { PokemonModule } from './pokemon/pokemon.module'; // Importa PokemonModule aquí
-import { PokemonService } from './pokemon/pokemon.service';
-import { PokemonController } from './pokemon/pokemon.controller';
+import { PokemonModule } from './pokemon/pokemon.module';
+import { CommonModule } from './common/common.module';
 import { SeedModule } from './seed/seed.module';
+import { EnvConfiguration } from './config/env.config';
+import { JoiValidationSchema } from './config/joi.validation';
 
 @Module({
   imports: [
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'),
+    
+    ConfigModule.forRoot({
+      load: [ EnvConfiguration ],
+      validationSchema: JoiValidationSchema,
     }),
-    MongooseModule.forRoot('mongodb://localhost:27017/nest-pokemon'), // Conexión a MongoDB
+    
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname,'..','public'), 
+    }),
 
-    PokemonModule,  // Importa PokemonModule
-    HttpModule, SeedModule,
+// -- select url, 'http://localhost:3000/api/files/product/' || url from product_images;
+
+// -- update product_images set url = 'http://localhost:3000/api/files/product/' || url
+
+
+    
+    MongooseModule.forRoot( process.env.MONGODB,{
+      dbName: 'nest-pokemon',
+    } ),
+    
+    PokemonModule,
+
+    CommonModule,
+
+    SeedModule,
+
   ],
-
 })
 export class AppModule {}
